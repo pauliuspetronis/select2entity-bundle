@@ -23,21 +23,20 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class Select2EntityType extends AbstractType
 {
-    /** @var ManagerRegistry */
-    protected $registry;
-    /** @var ObjectManager */
-    protected $em;
-    /** @var RouterInterface */
-    protected $router;
-    /** @var array */
-    protected $config;
+    protected ManagerRegistry $registry;
+
+    protected ObjectManager $em;
+
+    protected RouterInterface $router;
+
+    protected array $config;
 
     /**
-     * @param ManagerRegistry   $registry
-     * @param RouterInterface   $router
-     * @param array             $config
+     * @param ManagerRegistry $registry
+     * @param RouterInterface $router
+     * @param array           $config
      */
-    public function __construct(ManagerRegistry $registry, RouterInterface $router, $config)
+    public function __construct(ManagerRegistry $registry, RouterInterface $router, array $config)
     {
         $this->registry = $registry;
         $this->em = $registry->getManager();
@@ -55,17 +54,18 @@ class Select2EntityType extends AbstractType
             }
             // Use the custom manager instead.
             $this->em = $em;
-        } else if (isset($this->config['object_manager'])) {
-            $em = $this->registry->getManager($this->config['object_manager']);
-            if (!$em instanceof ObjectManager) {
-                throw new \Exception('The entity manager \'em\' must be an ObjectManager instance');
-            }
-            $this->em = $em;
-        }
-        else {
-            $manager = $this->registry->getManagerForClass($options['class']);
-            if ($manager instanceof ObjectManager) {
-                $this->em = $manager;
+        } else {
+            if (isset($this->config['object_manager'])) {
+                $em = $this->registry->getManager($this->config['object_manager']);
+                if (!$em instanceof ObjectManager) {
+                    throw new \Exception('The entity manager \'em\' must be an ObjectManager instance');
+                }
+                $this->em = $em;
+            } else {
+                $manager = $this->registry->getManagerForClass($options['class']);
+                if ($manager instanceof ObjectManager) {
+                    $this->em = $manager;
+                }
             }
         }
 
@@ -75,7 +75,7 @@ class Select2EntityType extends AbstractType
                 throw new \Exception('The option transformer must be a string');
             }
             if (!class_exists($options['transformer'])) {
-                throw new \Exception('Unable to load class: '.$options['transformer']);
+                throw new \Exception('Unable to load class: ' . $options['transformer']);
             }
 
             $transformer = new $options['transformer']($this->em, $options['class'], $options['text_property'], $options['primary_key']);
@@ -102,7 +102,7 @@ class Select2EntityType extends AbstractType
         parent::finishView($view, $form, $options);
         // make variables available to the view
         $view->vars['remote_path'] = $options['remote_path']
-            ?: $this->router->generate($options['remote_route'], array_merge($options['remote_params'], ['page_limit' => $options['page_limit'] ]));
+            ?: $this->router->generate($options['remote_route'], array_merge($options['remote_params'], ['page_limit' => $options['page_limit']]));
 
         // merge variable names which are only set per instance with those from yml config
         $varNames = array_merge(['multiple', 'placeholder', 'primary_key', 'autostart', 'query_parameters'], array_keys($this->config));
@@ -115,7 +115,7 @@ class Select2EntityType extends AbstractType
 
             $reqParams = [];
             foreach ($options['req_params'] as $key => $reqParam) {
-                $reqParams[$key] = $accessor->getValue($view,  $reqParam . '.vars[full_name]');
+                $reqParams[$key] = $accessor->getValue($view, $reqParam . '.vars[full_name]');
             }
 
             $view->vars['attr']['data-req_params'] = json_encode($reqParams);
@@ -131,7 +131,7 @@ class Select2EntityType extends AbstractType
             $view->vars['full_name'] .= '[]';
         }
 
-	    $view->vars['class_type'] = $options['class_type'];
+        $view->vars['class_type'] = $options['class_type'];
     }
 
     /**
@@ -157,13 +157,13 @@ class Select2EntityType extends AbstractType
                     'enabled' => $this->config['allow_add']['enabled'],
                     'new_tag_text' => $this->config['allow_add']['new_tag_text'],
                     'new_tag_prefix' => $this->config['allow_add']['new_tag_prefix'],
-                    'tag_separators' => $this->config['allow_add']['tag_separators']
+                    'tag_separators' => $this->config['allow_add']['tag_separators'],
                 ],
                 'delay' => $this->config['delay'],
                 'text_property' => null,
                 'placeholder' => false,
                 'language' => $this->config['language'],
-		'theme' => $this->config['theme'],
+                'theme' => $this->config['theme'],
                 'required' => false,
                 'cache' => $this->config['cache'],
                 'cache_timeout' => $this->config['cache_timeout'],
@@ -175,7 +175,7 @@ class Select2EntityType extends AbstractType
                 'callback' => null,
                 'class_type' => null,
                 'query_parameters' => [],
-                'render_html' => $this->config['render_html'] ?? false
+                'render_html' => $this->config['render_html'] ?? false,
             ]
         );
     }

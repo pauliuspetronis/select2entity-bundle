@@ -2,7 +2,7 @@
 
 namespace Tetranz\Select2EntityBundle\Service;
 
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormTypeInterface;
@@ -11,25 +11,9 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class AutocompleteService
 {
-    /**
-     * @var FormFactoryInterface
-     */
-    private $formFactory;
-
-    /**
-     * @var ManagerRegistry
-     */
-    private $doctrine;
-
-    /**
-     * @param FormFactoryInterface $formFactory
-     * @param ManagerRegistry      $doctrine
-     */
-    public function __construct(FormFactoryInterface $formFactory, ManagerRegistry $doctrine)
+    public function __construct(private FormFactoryInterface $formFactory, private EntityManagerInterface $doctrine)
     {
-        $this->formFactory = $formFactory;
-        $this->doctrine = $doctrine;
-    }   
+    }
 
     /**
      * @param Request                  $request
@@ -37,7 +21,7 @@ class AutocompleteService
      *
      * @return array
      */
-    public function getAutocompleteResults(Request $request, $type)
+    public function getAutocompleteResults(Request $request, $type): array
     {
         $form = $this->formFactory->create($type);
         $fieldOptions = $form->get($request->get('field_name'))->getConfig()->getOptions();
@@ -75,7 +59,7 @@ class AutocompleteService
         $count = $countQB->getQuery()->getSingleScalarResult();
         $paginationResults = $resultQb->getQuery()->getResult();
 
-        $result = ['results' => null, 'more' => $count > ($offset + $maxResults)];
+        $result = ['more' => $count > ($offset + $maxResults)];
 
         $accessor = PropertyAccess::createPropertyAccessor();
 

@@ -1,6 +1,9 @@
 # Bootstrap
 app/bootstrap*
 
+# phpstan
+phpstan.neon
+
 # Symfony directories
 vendor/*
 */logs/*
@@ -14,6 +17,7 @@ app/config/parameters.yml
 
 # Composer
 composer.phar
+composer.lock
 
 #PhpStorm
 .idea
